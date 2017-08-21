@@ -36,4 +36,5 @@ puts player.items
 puts player.status[:smell]
 player.status[:skin] = "wet"
 puts player.status[:skin]
+puts player.status[:breath]
 player.lose("You screwed up. Goodbye.")
