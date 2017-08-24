@@ -68,6 +68,16 @@ class Bedroom < Room
         puts "that you have impeccable fashion sense."
         @@player.add_item("clothes")
         clothes_taken = true
+      elsif (action =~ /put/i && action =~ /clothes/i && @@player.clothes_on == true) ||
+            (action =~ /dressed/i && @@player.clothes_on == true)
+        puts "What.. you're already dressed."
+      elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == true) ||
+            (action =~ /dressed/i && clothes_taken == true)
+            puts "You put on your clothes. Damn do you look sharp in them."
+            @@player.clothes_on = true
+      elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == false) ||
+            (action =~ /dressed/i && clothes_taken == false)
+        puts "You can't put on what you don't have."
       elsif action =~ /look/i && action =~ /around/i
         if clothes_taken == false
           puts "You look around and see the work clothes you laid out last"
