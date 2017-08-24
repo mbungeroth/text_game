@@ -54,7 +54,8 @@ class Bedroom < Room
       elsif action =~ /door/i && action =~ /open/i
         puts "You open the door and gaze into the living room."
         door_open = true
-      elsif action =~ /into/i && action =~ /go/i  && door_open == true
+      elsif (action =~ /into/i && action =~ /go/i  && door_open == true) ||
+            (action =~ /through/i && action =~ /doorway/i && door_open == true)
         puts "You sleepily walk into the next room."
         return :living_room
       elsif action =~ /go/i && action =~ /door/i && door_open == false
