@@ -1,9 +1,9 @@
 class Player
-  attr_reader :items, :status #TODO see if this can be deleted
-  attr_writer :room
+  attr_accessor :room, :items, :status
 
-  def initialize(room = "bed",
+  def initialize(room = "bedroom",
                  items = [],
+                 clothes_on = false,
                  status = { smell: "bad", skin: "dry", breath: "stinky",
                             hunger: true, coffee: false })
     @room = room
@@ -21,20 +21,7 @@ class Player
 
   def lose(message)
     puts message
-    exit(0)
-  end
-
-  def win(message)
-    puts message
+    puts "You lose."
     exit(0)
   end
 end
-
-player = Player.new()
-player.add_item("frog")
-puts player.items
-puts player.status[:smell]
-player.status[:skin] = "wet"
-puts player.status[:skin]
-puts player.status[:breath]
-player.lose("You screwed up. Goodbye.")
