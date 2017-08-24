@@ -73,8 +73,8 @@ class Bedroom < Room
         puts "What.. you're already dressed."
       elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == true) ||
             (action =~ /dressed/i && clothes_taken == true)
-            puts "You put on your clothes. Damn do you look sharp in them."
-            @@player.clothes_on = true
+        puts "You put on your clothes. Damn do you look sharp in them."
+        @@player.clothes_on = true
       elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == false) ||
             (action =~ /dressed/i && clothes_taken == false)
         puts "You can't put on what you don't have."
