@@ -3,9 +3,8 @@ class Player
 
   def initialize(room = "bedroom",
                  items = [],
-                 clothes_on = false,
                  status = { smell: "bad", skin: "dry", breath: "stinky",
-                            hunger: true, coffee: false })
+                            hunger: true, coffee: false, clothes: false })
     @room = room
     @items = items
     @status = status
