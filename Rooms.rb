@@ -63,22 +63,22 @@ class Bedroom < Room
         puts "..."
         puts "The door wins."
         @@player.lose("You knock yourself out, sleep through work, lose your job.")
+      elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == false) ||
+            (action =~ /dressed/i && clothes_taken == false)
+        puts "You can't put on what you don't have."
       elsif action =~ /clothes/i && clothes_taken == false
         puts "You pick up your clothes. You feel like a winner. They are"
         puts "superbly clean and the polka dot underwear reminds you"
         puts "that you have impeccable fashion sense."
         @@player.add_item("clothes")
         clothes_taken = true
-      elsif (action =~ /put/i && action =~ /clothes/i && @@player.clothes_on == true) ||
-            (action =~ /dressed/i && @@player.clothes_on == true)
+      elsif (action =~ /put/i && action =~ /clothes/i && @@player.status[:clothes] == true) ||
+            (action =~ /dressed/i && @@player.status[:clothes] == true)
         puts "What.. you're already dressed."
       elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == true) ||
             (action =~ /dressed/i && clothes_taken == true)
         puts "You put on your clothes. Damn do you look sharp in them."
-        @@player.clothes_on = true
-      elsif (action =~ /put/i && action =~ /clothes/i && clothes_taken == false) ||
-            (action =~ /dressed/i && clothes_taken == false)
-        puts "You can't put on what you don't have."
+        @@player.status[:clothes] = true
       elsif action =~ /look/i && action =~ /around/i
         if clothes_taken == false
           puts "You look around and see the work clothes you laid out last"
