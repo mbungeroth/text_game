@@ -3,6 +3,7 @@ class Map
              living_room: LivingRoom.new(),
              kitchen: Kitchen.new(),
              bathroom: Bathroom.new(),
+             hall: Hall.new(),
              finished: Finished.new()}
 
   def initialize(start_room)
