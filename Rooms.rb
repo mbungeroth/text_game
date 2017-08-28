@@ -126,10 +126,7 @@ class LivingRoom < Room
       print ">>> "
       action = $stdin.gets.chomp
 
-      if action == "end test"
-        return :finished
-      elsif action =~ /look/i && action =~ /table/i
-        puts items_on_table.length
+      if action =~ /look/i && action =~ /table/i
         range = items_on_table[0...items_on_table.length-1]
         puts "You look at the coffee table with a bit more interest."
         print "You see a "
@@ -173,6 +170,117 @@ class LivingRoom < Room
         puts "...what?"
       end
     end
+  end
+end
+
+
+class Kitchen < Room
+  def initialize; end
+
+  def enter
+    puts "You rub your tired eyes as you enter the kitchen. There is"
+    puts "a fridge that is gently humming along. Next to it is a"
+    puts "counter with an electric coffee maker on top, next to a"
+    puts "bunch of bananas. Next to that is your kitchen sink and a"
+    puts "drying rack with an assortment of festive mugs."
+
+  items_in_fridge = ["yogurt",
+                     "slice of cake",
+                     "a paper plate with nothing on it",
+                     "an ice pack that you meant to put in the freezer"]
+  mug = "no"
+
+    loop do
+      print ">>> "
+      action = $stdin.gets.chomp
+
+      if action == "end test"
+        return :finished
+      elsif (action =~ /on/i) ||
+            (action =~ /make/i) &&
+            action =~ /coffee/i &&
+            mug == "no"
+        puts "You turn on your coffee maker. It begins working. It starts"
+        puts "dripping fresh, hot coffee... all over the counter and now"
+        puts "the floor as well. You dingus. In a rush to clean it, you"
+        puts "burn your hands on it."
+        @@player.lose("What a mess. You give up on your life.")
+      elsif action =~ /mug/i && action !=~ /make/i
+        puts "You take a mug and place it on the coffee maker, ready"
+        puts "to receive your delicious brew."
+        mug = "yes"
+      elsif ((action =~ /on/i) ||
+            (action =~ /make/i) &&
+            action =~ /coffee/i &&
+            mug == "yes") ||
+            (action =~ /mug/i &&
+            (action =~ /make/i ||
+            action =~ /on/i))
+        puts "The aroma of your freshly made coffe is outsanding."
+        puts "What a way to start the day. You slowly sip it, feeling"
+        puts "your body slowly begin to come alive."
+        @@player.status[:coffee] = true
+        if @@player.status[:breath] = "good"
+          @@player.status[:breath] = "stinky"
+        end
+      elsif (action =~ /look/i || action =~ /open/i) && action =~ /fridge/i
+        range = items_in_fridge[0...items_in_fridge.length-1]
+        puts "You open the refrigerator door."
+        print "You see a "
+        range.each { |item| print item + ", " }
+        print "and a "
+        puts items_in_fridge[items_in_fridge.length-1]+"."
+      elsif (action =~ /eat/i && action =~ /banana/i && action =~ /cake/i) ||
+            (action =~ /eat/i && action =~ /banana/i && action =~ /yogurt/i) ||
+            (action =~ /eat/i && action =~ /yogurt/i && action =~ /cake/i)
+        puts "Oh my goodness what a breakfast of champions!"
+        @@player.status[:hunger] = false
+        items_in_fridge.each do |item|
+          if item == "cake"
+            items_in_fridge.delete("cake")
+          elsif item == "yogurt"
+            items_in_fridge.delete("yogurt")
+          end
+        end
+      elsif action =~ /eat/i && action =~ /banana/i
+        puts "Mmm. My oh my what a delicious banana. You feel the"
+        puts "potassium and sugars flow through you, energizing you."
+        puts "You feel great."
+        @@player.status[:hunger] = false
+      elsif action =~ /eat/i && action =~/cake/i
+        puts "You devil, you. Cake for breakfast? Hey, you only live once."
+        @@player.status[:hunger] = false
+        items_in_fridge.each do |item|
+          if item == "slice of cake"
+            items_in_fridge.delete("slice of cake")
+          end
+        end
+      elsif action =~ /eat/i && action =~ /yogurt/i
+        puts "You open the lid and toss the yogurt into your mouth"
+        puts "like a champ. The nutrients liven your body up."
+        @@player.status[:hunger] = false
+        items_in_fridge.each do |item|
+          if item == "yogurt"
+            items_in_fridge.delete("yogurt")
+      elsif action =~ /go/i && action =~ /living_room/i
+        return :living_room
+      elsif action =~ /go/i && action =~ /bathroom/i
+        return :bathroom
+      else
+        puts "...what?"
+          end
+        end
+      end
+    end
+  end
+end
+
+class Bathroom < Room
+  def initialize; end
+
+  def enter
+    puts "You win."
+    exit(0)
   end
 end
 
