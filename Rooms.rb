@@ -101,6 +101,9 @@ class Bedroom < Room
         else
           puts "You see a door."
         end
+      elsif (action =~ /dressed/i or action =~ /clothes/i) ||
+            @@player.status[:smell] == "good"
+        puts "Your put clothes on your freshly cleaned body."
       else
         puts "...what?"
       end
@@ -117,7 +120,7 @@ class LivingRoom < Room
     puts "with some stuff on it. You have a television, across from"
     puts "the sofa (obviously). There is the door behind you, which"
     puts "leads back to the bedroom. You can also walk to the kitchen"
-    puts "or into the bathroom."
+    puts "or into the bathroom. Finally, there is your front door."
 
     items_on_table = ["TV remote", "coffee table book", "keys",
                       "chinese take-out container"]
@@ -166,6 +169,8 @@ class LivingRoom < Room
         return :kitchen
       elsif action =~ /bathroom/i
         return :bathroom
+      elsif action =~/front door/i
+        return :finished
       else
         puts "...what?"
       end
@@ -189,6 +194,8 @@ class Kitchen < Room
                      "a paper plate with nothing on it",
                      "an ice pack that you meant to put in the freezer"]
   mug = "no"
+
+#TODO fix that you can't eat stuff you've already eaten
 
     loop do
       print ">>> "
@@ -279,8 +286,62 @@ class Bathroom < Room
   def initialize; end
 
   def enter
-    puts "You win."
-    exit(0)
+    puts "You go into your bathroom. It has... well... bathroom things -"
+    puts "a shower, a sink, a toilet, a mirror, a towel, your"
+    puts "toothbrush, and some toothpaste."
+
+    loop do
+      print ">>> "
+      action = $stdin.gets.chomp
+
+      if action == "end test"
+        return :finished
+      elsif action =~ /shower/i and @@player.status[:clothes] == true
+        puts "You turn on the shower and get in."
+        puts "Seriously? You just showered with your clothes on?"
+        @@player.lose("Good luck with life. You are a wet mess.")
+      elsif action =~ /shower/i and @@player.status[:clothes] == false
+        puts "You turn on the shower and get in. You wipe away"
+        puts "the filth that was your weekend. You feel great."
+        @@player.status[:smell] = "good"
+        @@player.status[:skin] = "wet"
+      elsif action =~ /dry/i || action =~ /towel/i
+        puts "You rub the towel all over yourself. Every nook and cranny."
+        @@player.status[:skin] = "dry"
+      elsif action =~ /teeth/i || action =~ /brush/i
+        puts "You put toothpaste on the brush and brush away the utter"
+        puts "grossness that is your breath right now."
+        @@player.status[:breath] = "good"
+      elsif (action =~ /undress/i ||
+            (action =~ /clothes/i && action =~ /off/i)) &&
+            @@player.status[:clothes] == true
+        puts "You take your clothes off. Nekkid time."
+        @@player.status[:clothes] == false
+      elsif action =~ /dressed/i ||
+            (action =~ /clothes/i && action =~ /on/i)
+        if @@player.status[:skin] == "wet" && @@player.items.include?("clothes")
+          puts "Annnnd you just put clothes on a wet body. You have"
+          puts "rendered them unwearable today, genius."
+          @@player.lose("Good job!")
+        elsif @@player.status[:skin] == "dry" && @@player.items.include?("clothes")
+          puts "You put clothes on your nice clean body."
+          @@player.status[:clothes] == true
+        else
+          puts "How do you put on clothing you don't have?"
+        end
+      elsif action =~ /mirror/i
+        puts "You look in the mirror. Those gorgeous eyes stare right back."
+      elsif action =~ /toilet/i || action =~ /pee/i || action =~/poo/i
+        puts "You use the toilet and flush away two pounds."
+      elsif action =~ /look around/i
+        puts "You see a shower, a sink, a toilet, a mirror, a towel, your"
+        puts "toothbrush, and some toothpaste. The room ain't changing."
+      elsif action =~ /living room/i
+        return :living_room
+      else
+        puts "...what?"
+      end
+    end
   end
 end
 
