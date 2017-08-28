@@ -71,8 +71,13 @@ class Bedroom < Room
       elsif (action =~ /into/i && action =~ /go/i  && door_open == true) ||
             (action =~ /through/i && action =~ /doorway/i && door_open == true) ||
             (action =~ /to/i && action =~ /room/i && door_open == true)
-        puts "You sleepily walk into the next room."
-        return :living_room
+        if clothes_taken == false
+          puts "So we're just leaving our clothes behind today, huh?"
+          @@player.lose("You go to work naked and get arrested. Weirdo.")
+        else
+          puts "You sleepily walk into the next room."
+          return :living_room
+        end
       elsif action =~ /go/i && action =~ /door/i && door_open == false
         puts "You attempt to run, with all of your might, through the door."
         puts "..."
@@ -115,9 +120,9 @@ class LivingRoom < Room
     puts "You enter the living room."
     puts "You have a luxuriously soft sofa and a nearby coffe table"
     puts "with some stuff on it. You have a television, across from"
-    puts "the sofa (obviously). There is the door behind you, which"
-    puts "leads back to the bedroom. You can also walk to the kitchen"
-    puts "or into the bathroom."
+    puts "the sofa (obviously). The living room connects to a hall"
+    puts "which you can use to walk to the kitchen or into the"
+    puts "bathroom, or out your front door."
 
     items_on_table = ["TV remote", "coffee table book", "keys",
                       "chinese take-out container"]
@@ -161,13 +166,68 @@ class LivingRoom < Room
         puts "gently lulls you to sleep. Welome to Dreamland, buddy."
         @@player.lose("You wake up a day later. You lost your job.")
       elsif action =~ /bedroom/i
-        return :bedroom
-      elsif action =~ /kitchen/i
-        return :kitchen
-      elsif action =~ /bathroom/i
-        return :bathroom
+        puts "Let's not go back there."
+      elsif action =~ /kitchen/i || action =~ /bathroom/i || action =~/front door/i
+        puts "You gotta go into the hall first."
+      elsif action =~/hall/i
+        return :hall
       else
         puts "...what?"
+      end
+    end
+  end
+end
+
+
+class Hall < Room
+  def initialize; end
+
+  def enter
+    loop do
+      puts "You are in your hall."
+      if @@player.status[:bathroom] == false &&
+         @@player.status[:kitchen] == false
+        puts "You may go to the kitchen, the bathroom, or out the front door."
+        action = $stdin.gets.chomp
+        if action =~ /bathroom/i
+          return :bathroom
+        elsif action =~ /kitchen/i
+          return :kitchen
+        elsif action =~ /front/i
+          return :finished
+        else
+          puts "...what?"
+        end
+      elsif @@player.status[:bathroom] == false &&
+            @@player.status[:kitchen] == true
+        puts "You may go to the bathroom or out the front door."
+        action = $stdin.gets.chomp
+        if action =~ /bathroom/i
+          return :bathroom
+        elsif action =~ /front/i
+          return :finished
+        else
+          puts "...what?"
+        end
+      elsif @@player.status[:bathroom] == true &&
+            @@player.status[:kitchen] == false
+        puts "You may go to the kitchen or out the front door."
+        action = $stdin.gets.chomp
+        if action =~ /kitchen/i
+          return :kitchen
+        elsif action =~ /front/i
+          return :finished
+        else
+          puts "...what?"
+        end
+      else
+        puts "You may go out the front door."
+        action = $stdin.gets.chomp
+        if action =~ /front/i
+          return :finished
+        else
+          puts "...what?"
+        end
       end
     end
   end
@@ -189,25 +249,16 @@ class Kitchen < Room
                      "a paper plate with nothing on it",
                      "an ice pack that you meant to put in the freezer"]
   mug = "no"
+  cake = "not eaten"
+  yogurt = "not eaten"
 
     loop do
+
       print ">>> "
       action = $stdin.gets.chomp
 
-      if action == "end test"
-        return :finished
-      elsif (action =~ /on/i) ||
-            (action =~ /make/i) &&
-            action =~ /coffee/i &&
-            mug == "no"
-        puts "You turn on your coffee maker. It begins working. It starts"
-        puts "dripping fresh, hot coffee... all over the counter and now"
-        puts "the floor as well. You dingus. In a rush to clean it, you"
-        puts "burn your hands on it."
-        @@player.lose("What a mess. You give up on your life.")
-      elsif action =~ /mug/i && action !=~ /make/i
-        puts "You take a mug and place it on the coffee maker, ready"
-        puts "to receive your delicious brew."
+      if action =~ /take/i && action =~ /mug/i
+        puts "You take a mug"
         mug = "yes"
       elsif ((action =~ /on/i) ||
             (action =~ /make/i) &&
@@ -223,6 +274,15 @@ class Kitchen < Room
         if @@player.status[:breath] = "good"
           @@player.status[:breath] = "stinky"
         end
+      elsif (action =~ /on/i) ||
+            (action =~ /make/i) &&
+            action =~ /coffee/i &&
+            mug == "no"
+        puts "You turn on your coffee maker. It begins working. It starts"
+        puts "dripping fresh, hot coffee... all over the counter and now"
+        puts "the floor as well. You dingus. In a rush to clean it, you"
+        puts "burn your hands on it."
+        @@player.lose("What a mess. You give up on your life.")
       elsif (action =~ /look/i || action =~ /open/i) && action =~ /fridge/i
         range = items_in_fridge[0...items_in_fridge.length-1]
         puts "You open the refrigerator door."
@@ -248,28 +308,37 @@ class Kitchen < Room
         puts "You feel great."
         @@player.status[:hunger] = false
       elsif action =~ /eat/i && action =~/cake/i
-        puts "You devil, you. Cake for breakfast? Hey, you only live once."
-        @@player.status[:hunger] = false
-        items_in_fridge.each do |item|
-          if item == "slice of cake"
-            items_in_fridge.delete("slice of cake")
+        if cake == "not eaten"
+          puts "You devil, you. Cake for breakfast? Hey, you only live once."
+          cake = "eaten"
+          @@player.status[:hunger] = false
+          items_in_fridge.each do |item|
+            if item == "slice of cake"
+              items_in_fridge.delete("slice of cake")
+            end
           end
+        else
+          puts "You already ate it."
         end
       elsif action =~ /eat/i && action =~ /yogurt/i
-        puts "You open the lid and toss the yogurt into your mouth"
-        puts "like a champ. The nutrients liven your body up."
-        @@player.status[:hunger] = false
-        items_in_fridge.each do |item|
-          if item == "yogurt"
-            items_in_fridge.delete("yogurt")
-      elsif action =~ /go/i && action =~ /living_room/i
-        return :living_room
-      elsif action =~ /go/i && action =~ /bathroom/i
-        return :bathroom
+        if yogurt == "not eaten"
+          yogurt = "eaten"
+          puts "You open the lid and toss the yogurt into your mouth"
+          puts "like a champ. The nutrients liven your body up."
+          @@player.status[:hunger] = false
+          items_in_fridge.each do |item|
+            if item == "yogurt"
+              items_in_fridge.delete("yogurt")
+            end
+          end
+        else
+          puts "You already ate it."
+        end
+      elsif action =~ /hall/i
+        @@player.status[:kitchen] = true
+        return :hall
       else
         puts "...what?"
-          end
-        end
       end
     end
   end
@@ -279,8 +348,63 @@ class Bathroom < Room
   def initialize; end
 
   def enter
-    puts "You win."
-    exit(0)
+    puts "You go into your bathroom. It has... well... bathroom things -"
+    puts "a shower, a sink, a toilet, a mirror, a towel, your"
+    puts "toothbrush, and some toothpaste."
+
+    loop do
+      print ">>> "
+      action = $stdin.gets.chomp
+
+      if action == "end test"
+        return :finished
+      elsif action =~ /shower/i and @@player.status[:clothes] == true
+        puts "You turn on the shower and get in."
+        puts "Seriously? You just showered with your clothes on?"
+        @@player.lose("Good luck with life. You are a wet mess.")
+      elsif action =~ /shower/i and @@player.status[:clothes] == false
+        puts "You turn on the shower and get in. You wipe away"
+        puts "the filth that was your weekend. You feel great."
+        @@player.status[:smell] = "good"
+        @@player.status[:skin] = "wet"
+      elsif action =~ /dry/i || action =~ /towel/i
+        puts "You rub the towel all over yourself. Every nook and cranny."
+        @@player.status[:skin] = "dry"
+      elsif action =~ /teeth/i || action =~ /brush/i
+        puts "You put toothpaste on the brush and brush away the utter"
+        puts "grossness that is your breath right now."
+        @@player.status[:breath] = "good"
+      elsif (action =~ /undress/i ||
+            (action =~ /clothes/i && action =~ /off/i)) &&
+            @@player.status[:clothes] == true
+        puts "You take your clothes off. Nekkid time."
+        @@player.status[:clothes] == false
+      elsif action =~ /dressed/i ||
+            (action =~ /clothes/i && action =~ /on/i)
+        if @@player.status[:skin] == "wet" && @@player.items.include?("clothes")
+          puts "Annnnd you just put clothes on a wet body. You have"
+          puts "rendered them unwearable today, genius."
+          @@player.lose("Good job!")
+        elsif @@player.status[:skin] == "dry" && @@player.items.include?("clothes")
+          puts "You put clothes on your nice clean body."
+          @@player.status[:clothes] == true
+        else
+          puts "How do you put on clothing you don't have?"
+        end
+      elsif action =~ /mirror/i
+        puts "You look in the mirror. Those gorgeous eyes stare right back."
+      elsif action =~ /toilet/i || action =~ /pee/i || action =~/poo/i
+        puts "You use the toilet and flush away two pounds."
+      elsif action =~ /look around/i
+        puts "You see a shower, a sink, a toilet, a mirror, a towel, your"
+        puts "toothbrush, and some toothpaste. The room ain't changing."
+      elsif action =~ /hall/i
+        @@player.status[:bathroom] = true
+        return :hall
+      else
+        puts "...what?"
+      end
+    end
   end
 end
 
@@ -288,7 +412,17 @@ class Finished < Room
   def initialize; end
 
   def enter
-    puts "You win."
-    exit(0)
+    loop do
+      if @@player.status[:breath] == "stinky"
+        @@player.lose("You left with nasty breath, you slob.")
+      elsif @@player.status[:smell] == "bad"
+        @@player.lose("You left without a shower, you slob.")
+      elsif !@@player.items.include?("keys")
+        @@player.lose("You left without your keys, genius.")
+      else
+        puts "You win! Can't wait to try again tomorrow!"
+        exit(0)
+      end
+    end
   end
 end
