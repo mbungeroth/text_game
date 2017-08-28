@@ -4,7 +4,8 @@ class Player
   def initialize(room = "bedroom",
                  items = [],
                  status = { smell: "bad", skin: "dry", breath: "stinky",
-                            hunger: true, coffee: false, clothes: false })
+                            hunger: true, coffee: false, clothes: false,
+                            bathroom: false, kitchen: false })
     @room = room
     @items = items
     @status = status
