@@ -1,6 +1,8 @@
 class Map
   @@rooms = {bedroom: Bedroom.new(),
              living_room: LivingRoom.new(),
+             kitchen: Kitchen.new(),
+             bathroom: Bathroom.new(),
              finished: Finished.new()}
 
   def initialize(start_room)
